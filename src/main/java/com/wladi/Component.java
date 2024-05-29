@@ -19,8 +19,8 @@ public class Component implements QuerySelector {
     private Connection connection;
     private JsonModel jsonModel;
 
-    public Component(DatabaseConnection databaseConnection) throws SQLException {
-        this.connection = databaseConnection.getConnection();
+    public Component(String url, String username, String password) throws SQLException {
+        this.connection = new DatabaseConnection(url, username, password).getConnection();
         this.jsonModel = new JsonModel();
     }
 

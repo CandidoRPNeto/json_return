@@ -8,6 +8,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wladi.configuration.DatabaseConnection;
 import com.wladi.models.JsonModel;
 import com.wladi.models.QueryResultModel;
@@ -18,12 +22,13 @@ public class Component implements QuerySelector {
 
     private Connection connection;
     private JsonModel jsonModel;
+    private final ObjectMapper objectMapper;
 
     public Component(String url, String username, String password) throws SQLException {
         this.connection = new DatabaseConnection(url, username, password).getConnection();
         this.jsonModel = new JsonModel();
+        this.objectMapper = new ObjectMapper();
     }
-
     @Override
     public QueryResultModel generateDataAndMetaData(String tableName) throws SQLException {
         SelectQueryModel queryModel = new SelectQueryModel(tableName);
@@ -52,6 +57,11 @@ public class Component implements QuerySelector {
     public String createJson(String tableName) throws SQLException {
         QueryResultModel queryResult = generateDataAndMetaData(tableName);
         return jsonModel.jsonBuilder(queryResult);
+    }
+
+    public JsonNode createJsonObject(String tableName) throws SQLException, JsonMappingException, JsonProcessingException {
+        String jsonString = createJson(tableName);
+        return objectMapper.readTree(jsonString);
     }
 
     public void close() throws SQLException {
